@@ -1,7 +1,6 @@
-use esp_idf_svc::hal::{
-    prelude::Peripherals,
-    uart::{UartConfig, UartDriver},
-};
+use esp_idf_hal::{delay::BLOCK, prelude::Peripherals};
+
+mod mmwave;
 
 fn main() {
     // It is necessary to call this function once. Otherwise some patches to the runtime
@@ -13,18 +12,11 @@ fn main() {
 
     let peripherals = Peripherals::take().unwrap();
 
-    let mmtx = peripherals.pins.gpio10;
-    let mmrx = peripherals.pins.gpio11;
-
-    let config = UartConfig::new()
-        .baudrate(115200)
-        .parity_none()
-        .stop_bits(1);
-    let mmwave = UartDriver::new(peripherals.uart0, mmtx, mmrx, None, None, &config);
-
-    if let Err(why) = mmwave {
-        log::error!("{:?}", why);
-    }
+    let mmtx = peripherals.pins.gpio11;
+    let mmrx = peripherals.pins.gpio10;
+    let mut radar = mmwave::MMWave::new();
+    radar.init();
+    radar.read();
 
     log::info!("Hello, world!");
 }
