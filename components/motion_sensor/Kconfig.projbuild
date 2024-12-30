@@ -1,0 +1,13 @@
+menu "Motion sensor configuration"
+        config MOTION_SENSOR_UART_NUM
+        int "UART number to use for the motion sensor"
+        default 2
+
+    config MOTION_SENSOR_UART_TX
+        int "UART Tx pin to use for the motion sensor"
+        default 11
+    config MOTION_SENSOR_UART_RX
+        int "UART Rx pin to use for the motion sensor"
+        default 10
+
+endmenu
