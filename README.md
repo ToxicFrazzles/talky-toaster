@@ -5,7 +5,7 @@ Inspired by the television show Red Dwarf.
 This repository contains the firmware for a real-life version of the talky-toaster using a mmWave presence sensor, an audio amplifier and an ESP32S3 microcontroller.
 
 ## TODO:
-
+- [x] Read distance data from mmWave sensor
 - [ ] Identify ways the mmWave sensor can be configured to reduce detection range and the non-presence timeout
 - [ ] Play audio on the audio amplifier
 - [ ] Play audio track when somebody enters the room
