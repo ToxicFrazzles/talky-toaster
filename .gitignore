@@ -1,4 +1,3 @@
-/.vscode
-/.embuild
-/target
-/Cargo.lock
+build/
+sdkconfig
+sdkconfig.old
