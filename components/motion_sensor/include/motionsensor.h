@@ -8,4 +8,4 @@
 
 // const uart_port_t uart_num = CONFIG_MOTION_SENSOR_UART_NUM;
 
-void setup_device(void *arg);
+esp_err_t setup_motion_sensor();

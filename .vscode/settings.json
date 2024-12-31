@@ -1,5 +1,11 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.port": "/dev/ttyACM0"
+  "idf.port": "/dev/ttyACM0",
+  "files.associations": {
+    "freertos.h": "c",
+    "motionsensor.h": "c",
+    "module.h": "c",
+    "report.h": "c"
+  }
 }
