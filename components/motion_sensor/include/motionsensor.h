@@ -9,3 +9,5 @@
 // const uart_port_t uart_num = CONFIG_MOTION_SENSOR_UART_NUM;
 
 esp_err_t setup_motion_sensor();
+uint16_t motion_sensor_get_distance();
+bool motion_sensor_get_detected();

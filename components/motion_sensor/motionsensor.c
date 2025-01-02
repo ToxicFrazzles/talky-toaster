@@ -7,6 +7,8 @@
 #include "include/module.h"
 #include "include/timing.h"
 #include "include/report.h"
+#include "freertos/semphr.h"
+
 
 #define UART_PORT (uart_port_t) CONFIG_MOTION_SENSOR_UART_NUM
 
@@ -15,6 +17,28 @@ static TaskHandle_t* motion_sensor_task_handle;
 
 static motion_sensor_state_t motion_sensor_state = STATE_UNKNOWN;
 static TickType_t last_received = 0;
+static report_t* report;
+static SemaphoreHandle_t mutex = NULL;
+
+
+uint16_t motion_sensor_get_distance(){
+    if(mutex == NULL || report == NULL) return 0;
+    uint16_t result;
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    result = report->distance;
+    xSemaphoreGive(mutex);
+    return result;
+}
+
+bool motion_sensor_get_detected(){
+    if(mutex == NULL || report == NULL) return false;
+    bool result;
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    result = report->detected;
+    xSemaphoreGive(mutex);
+    return result;
+}
+
 
 esp_err_t send_command(uint16_t command_code, uint8_t* command_data,
                        uint16_t command_data_length) {
@@ -73,7 +97,7 @@ bool is_normal_mode(uint8_t* buffer, int buffer_len) {
 
 void motion_sensor_task(void* args) {
     uint8_t* buffer = (uint8_t*)malloc(64);
-    report_t* report = allocate_report();
+    report = allocate_report();
     bool report_updated = false;
     int buffer_len = 0;
     TickType_t timer = 0;
@@ -136,8 +160,9 @@ void motion_sensor_task(void* args) {
                     break;
                 }
 
-
+                xSemaphoreTake(mutex, portMAX_DELAY);
                 parse_report(buffer+report_offset, buffer_len-report_offset, report);
+                xSemaphoreGive(mutex);
                 report_updated = true;
                 if(buffer_len <= 45) buffer_len = 0;
                 else{
@@ -154,8 +179,8 @@ void motion_sensor_task(void* args) {
                 break;
         }
 
-        if(report_updated)
-        ESP_LOGI(TAG, "Detected: %02d, Distance: %02d", report->detected, report->distance);
+        // if(report_updated)
+        // ESP_LOGI(TAG, "Detected: %02d, Distance: %02d", report->detected, report->distance);
         // ESP_LOGI(TAG, "GATES: %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d %02d", report->gate_energies[0], report->gate_energies[1], report->gate_energies[2], report->gate_energies[3], report->gate_energies[4], report->gate_energies[5], report->gate_energies[6], report->gate_energies[7], report->gate_energies[8], report->gate_energies[9], report->gate_energies[10], report->gate_energies[11], report->gate_energies[12], report->gate_energies[13], report->gate_energies[14], report->gate_energies[15]);
         
     }
@@ -164,6 +189,7 @@ void motion_sensor_task(void* args) {
 }
 
 esp_err_t setup_motion_sensor() {
+    mutex = xSemaphoreCreateMutex();
     uart_config_t uart_config = {
         .baud_rate = 115200,
         .data_bits = UART_DATA_8_BITS,
